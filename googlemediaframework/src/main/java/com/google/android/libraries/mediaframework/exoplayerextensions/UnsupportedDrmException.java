@@ -20,12 +20,6 @@
  */
 package com.google.android.libraries.mediaframework.exoplayerextensions;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-
 /**
  * Exception thrown when the required level of DRM is not supported.
  */
@@ -37,14 +31,17 @@ public final class UnsupportedDrmException extends Exception {
   public static final int REASON_INVALID_SERVER_CODE = 3;
   public static final int REASON_SERVER_NOT_CONNECTED = 4;
 
-  public int reason;
+  public final int reason;
+  public final RequestData requestData;
 
-  public UnsupportedDrmException(int reason) {
+  public UnsupportedDrmException(int reason, RequestData requestData) {
     this.reason = reason;
+    this.requestData = requestData;
   }
 
-  public UnsupportedDrmException(int reason, Exception cause) {
+  public UnsupportedDrmException(int reason, RequestData requestData, Exception cause) {
     super(cause);
     this.reason = reason;
+    this.requestData = requestData;
   }
 }

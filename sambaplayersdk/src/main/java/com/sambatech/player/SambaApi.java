@@ -123,27 +123,8 @@ public class SambaApi {
 			request = params[0];
 
 			int delimiter = request.mediaId != null ? Integer.parseInt(request.mediaId.split("(?=\\d[a-zA-Z]*$)")[1].substring(0, 1)) : 0;
-			String endpoint;
 
-			switch (request.environment) {
-				case LOCAL:
-					endpoint = activity.getString(R.string.player_endpoint_local);
-					break;
-
-				case DEV:
-					endpoint = activity.getString(R.string.player_endpoint_test);
-					break;
-
-				case STAGING:
-					endpoint = activity.getString(R.string.player_endpoint_staging);
-					break;
-
-				case PROD:
-				default:
-					endpoint = activity.getString(R.string.player_endpoint_prod);
-			}
-
-			String url = endpoint + request.projectHash + (request.mediaId != null ? "/" + request.mediaId : "?" +
+			String url = request.getEndpoint(activity) + request.projectHash + (request.mediaId != null ? "/" + request.mediaId : "?" +
 					(request.streamUrl != null ? "alternateLive=" + request.streamUrl : "streamName=" + request.streamName));
 
 			InputStream inputStream = null;
@@ -429,6 +410,8 @@ public class SambaApi {
 
 					media.blockIfRooted = playerSecurity.optBoolean("rootedDevices", false);
 				}
+
+				media.request = request;
 
 				return media;
 			}

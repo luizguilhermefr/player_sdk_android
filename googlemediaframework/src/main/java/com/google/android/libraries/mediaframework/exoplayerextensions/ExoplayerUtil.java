@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
 
 import com.google.android.exoplayer.ExoPlayerLibraryInfo;
@@ -33,13 +32,12 @@ import com.google.android.exoplayer.ExoPlayerLibraryInfo;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -106,8 +104,9 @@ public class ExoplayerUtil {
       int responseCode = urlConnection.getResponseCode();
 
       if (responseCode < 200 || responseCode > 299) {
-        printRequestData(urlConnection);
-        throw new UnsupportedDrmException(UnsupportedDrmException.REASON_INVALID_SERVER_CODE);
+        RequestData requestData = extractRequestData(urlConnection);
+        Log.i("DRM", "executePost: " + requestData);
+        throw new UnsupportedDrmException(UnsupportedDrmException.REASON_INVALID_SERVER_CODE, requestData);
       }
 
       InputStream in = new BufferedInputStream(urlConnection.getInputStream());
@@ -127,7 +126,7 @@ public class ExoplayerUtil {
    * @throws IOException
    */
   private static byte[] convertInputStreamToByteArray(InputStream inputStream) throws IOException {
-    byte[] bytes = null;
+    byte[] bytes;
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     byte data[] = new byte[1024];
     int count;
@@ -141,10 +140,10 @@ public class ExoplayerUtil {
     return bytes;
   }
 
-  private static void printRequestData(HttpURLConnection con) {
-    if (con == null) return;
+  private static RequestData extractRequestData(HttpURLConnection con) {
+    if (con == null) return null;
 
-    String headers = "";
+    Map<String, List<String>> headers = new HashMap<>();
     String content = "";
     String error = "";
     String requestMethod = "";
@@ -162,9 +161,7 @@ public class ExoplayerUtil {
       permission = con.getPermission().toString();
       responseCode = con.getResponseCode();
       responseMessage = con.getResponseMessage();
-
-      for (Map.Entry<String, List<String>> kv : con.getHeaderFields().entrySet())
-        headers += kv.getKey() + ": " + kv.getValue() + "\n";
+      headers = con.getHeaderFields();
 
       ctn = new Scanner((InputStream) con.getContent());
       ctnd = ctn.useDelimiter("\\A");
@@ -184,13 +181,12 @@ public class ExoplayerUtil {
       error = "DRM connection failed.";
     }
     finally {
-      Log.i("DRM", String.format("URL: %s\nRequest method: %s\nPermission: %s\nResponse code: %s\nResponse msg: %s\nHeaders: %s\nContent: %s\nError: %s",
-              con.getURL(), requestMethod, permission, responseCode, responseMessage, headers, content, error));
-
       if (ctn != null) ctn.close();
       if (ctnd != null) ctnd.close();
       if (escn != null) escn.close();
       if (escnd != null) escnd.close();
     }
+
+    return new RequestData(con.getURL().toString(), requestMethod, permission, responseCode, responseMessage, headers, content, error);
   }
 }

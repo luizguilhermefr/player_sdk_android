@@ -98,9 +98,26 @@ public class SambaPlayer extends FrameLayout {
 		public void onError(Exception e) {
 			Log.i("SambaPlayer", "Error: " + media, e);
 
-			String msg = e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
-					+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
-					: e.getMessage();
+			UnsupportedDrmException drmException = (UnsupportedDrmException)e.getCause();
+			String msg;
+
+			if (drmException != null) {
+				msg = "You're not allowed to " + (media.isAudioOnly ? "listen to this audio" : "watch this video");
+				String json = "{";
+				json += String.format("\"ua\": \"%s\",", System.getProperty("http.agent", "Unknown"));
+				json += String.format("\"path\": \"%s\",", media.request.getEndpoint((Activity)getContext()));
+				json += String.format("\"message\": \"%s\",", msg);
+				json += "\"session\": {";
+				json += String.format("\"SessionId\": \"%s\",", drmException.requestData.url.replaceAll(".+(SessionId=[^&]+).*", "$1"));
+				json += String.format("\"Ticket\": \"%s\"", drmException.requestData.url.replaceAll(".+(Ticket=[^&]+).*", "$1"));
+				json += "},";
+				json += String.format("\"event\": \"%s - %s: %s\"", drmException.requestData.responseCode,
+						drmException.requestData.errorMessage, drmException.requestData.responseMessage);
+				json += "}";
+				Log.i("SambaPlayer", json);
+			}
+			else msg = e.getMessage();
+
 			final boolean canFallback =  media.backupUrls.length - _currentBackupIndex > 0;
 
 			// check whether it can fallback or fail (changes error criticity) otherwise

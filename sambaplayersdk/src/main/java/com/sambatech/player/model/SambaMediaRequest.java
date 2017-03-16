@@ -1,6 +1,9 @@
 package com.sambatech.player.model;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
+
+import com.sambatech.player.R;
 
 /**
  * Data entity that represents a request media request to the server.
@@ -69,6 +72,20 @@ public class SambaMediaRequest {
 	@Override
 	public String toString() {
 		return String.format("projectHash: %s, id: %s, streamName: %s, streamUrls: %s, backupUrls (count): %s", projectHash, mediaId, streamName, streamUrl, backupUrls.length);
+	}
+
+	public String getEndpoint(Activity activity) {
+		switch (environment) {
+			case LOCAL:
+				return activity.getString(R.string.player_endpoint_local);
+			case DEV:
+				return activity.getString(R.string.player_endpoint_test);
+			case STAGING:
+				return activity.getString(R.string.player_endpoint_staging);
+			case PROD:
+			default:
+				return activity.getString(R.string.player_endpoint_prod);
+		}
 	}
 
 	public enum Environment {

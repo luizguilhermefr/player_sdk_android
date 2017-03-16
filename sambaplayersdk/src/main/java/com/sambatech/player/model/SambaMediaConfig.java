@@ -21,6 +21,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public int themeColor = 0xFF72BE44;
 	public String sttmUrl;
 	public String sttmKey;
+	public SambaMediaRequest request;
 	public DrmRequest drmRequest;
 	public boolean blockIfRooted;
 
@@ -40,7 +41,9 @@ public class SambaMediaConfig extends SambaMedia {
 			themeColor = m.themeColor;
 			sttmKey = m.sttmKey;
 			sttmUrl = m.sttmUrl;
+			request = m.request;
 			drmRequest = m.drmRequest;
+			blockIfRooted = m.blockIfRooted;
 		}
 	}
 
