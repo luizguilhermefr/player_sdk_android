@@ -21,9 +21,9 @@ jobs:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "sambaplayersdk/build.gradle" }}
 
-  sonar:
+  prepare:
     docker:
-      - image: circleci/openjdk:8-jdk-browsers
+      - image: circleci/android:api-25-alpha
     working_directory: ~/player_sdk_android
     steps:
       - attach_workspace:
@@ -48,6 +48,14 @@ jobs:
           command: |
             ./gradlew sambaplayersdk:lintRelease
             cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
+
+  sonar:
+    docker:
+      - image: circleci/android:api-25-alpha
+    working_directory: ~/player_sdk_android
+    steps:
+      - attach_workspace:
+          at: ~/player_sdk_android
       - run:
           name: Sonar lint
           command: |
@@ -82,12 +90,15 @@ workflows:
   player_android_sdk:
     jobs:
       - set-workspace
-      - sonar:
+      - prepare:
           requires:
             - set-workspace
       - compile_sdk:
           requires:
-            - sonar
+            - prepare
+      - sonar:
+          requires:
+            - compile_sdk
       - deploy_sdk_android:
           requires:
             - compile_sdk
