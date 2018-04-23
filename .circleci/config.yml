@@ -93,6 +93,7 @@ workflows:
           filters:
             branches:
               only:
+                - dev-circle_fork
                 - dev
                 - prod
                 - staging
