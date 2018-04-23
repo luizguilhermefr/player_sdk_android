@@ -78,7 +78,7 @@ jobs:
 
 workflows:
   version: 2
-  player_andoid_sdk:
+  player_android_sdk:
     jobs:
       - set-workspace
       - sonar:
