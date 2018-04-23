@@ -31,6 +31,7 @@ jobs:
       - run:
           name: Sonar analysis
           command: |
+            ls -l
             curl -fL https://getcli.jfrog.io | sh
             chmod +x jfrog
             cp -R assets/licenses $ANDROID_HOME/
