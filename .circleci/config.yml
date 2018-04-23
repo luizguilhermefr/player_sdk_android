@@ -4,9 +4,12 @@ jobs:
   set-workspace:
     docker:
       - image: circleci/android:api-25-alpha
+    working_directory: ~/player_sdk_android
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
+      - attach_workspace:
+          at: ~/player_sdk_android
       - checkout
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
@@ -21,7 +24,10 @@ jobs:
   sonar:
     docker:
       - image: circleci/openjdk:8-jdk-browsers
+    working_directory: ~/player_sdk_android
     steps:
+      - attach_workspace:
+          at: ~/player_sdk_android
       - run:
           name: Sonar analysis
           command: |
@@ -32,7 +38,10 @@ jobs:
   compile_sdk:
     docker:
       - image: circleci/android:api-25-alpha
+    working_directory: ~/player_sdk_android
     steps:
+      - attach_workspace:
+          at: ~/player_sdk_android
       - run:
           name: Assamble
           command: |
@@ -51,7 +60,10 @@ jobs:
   deploy_sdk_android:
     docker:
       - image: circleci/android:api-25-alpha
+    working_directory: ~/player_sdk_android
     steps:
+      - attach_workspace:
+          at: ~/player_sdk_android
       - run:
           name: Deploy on AWS S3 Bucket
           command: |
