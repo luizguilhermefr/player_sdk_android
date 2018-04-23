@@ -8,9 +8,9 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
+      - checkout
       - attach_workspace:
           at: ~/player_sdk_android
-      - checkout
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}-{{ checksum  "sambaplayersdk/build.gradle" }}
       - run:
@@ -51,7 +51,7 @@ jobs:
 
   sonar:
     docker:
-      - image: circleci/android:api-25-alpha
+      - image: circleci/openjdk:8-jdk-browsers
     working_directory: ~/player_sdk_android
     steps:
       - attach_workspace:
@@ -101,7 +101,7 @@ workflows:
             - compile_sdk
       - deploy_sdk_android:
           requires:
-            - compile_sdk
+            - sonar
           filters:
             branches:
               only:
